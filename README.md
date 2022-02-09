@@ -1,10 +1,19 @@
 # Yolo v3 Object Detection with Tensorflow 2.0
 Yolo v3 is an algorithm that uses deep convolutional neural networks to detect objects. <br> <br>
 
+## Fork Notes:
+This project has been adapted to also output each object in a data.json file. 
+
 ## Getting started
 
 ### Prerequisites
 This project is written in Python 3.7 using Tensorflow 2.0 (deep learning), NumPy (numerical computing), Pillow (image processing), OpenCV (computer vision) and seaborn (visualization) packages.
+
+- Note: to open this project in miniconda (in terminal):
+```
+conda create -n yolov3
+conda activate yolov3
+conda install python=3.7
 
 ```
 pip install -r requirements.txt

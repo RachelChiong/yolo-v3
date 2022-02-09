@@ -18,6 +18,7 @@ import cv2
 
 from yolo_v3 import Yolo_v3
 from utils import load_images, load_class_names, draw_boxes, draw_frame
+from edits import convert_to_mp4
 
 tf.compat.v1.disable_eager_execution()
 
@@ -29,6 +30,7 @@ _MAX_OUTPUT_SIZE = 20
 def main(type, iou_threshold, confidence_threshold, input_names):
     class_names = load_class_names(_CLASS_NAMES_FILE)
     n_classes = len(class_names)
+    object_list = []
 
     model = Yolo_v3(n_classes=n_classes, model_size=_MODEL_SIZE,
                     max_output_size=_MAX_OUTPUT_SIZE,
@@ -48,19 +50,23 @@ def main(type, iou_threshold, confidence_threshold, input_names):
 
         draw_boxes(input_names, detection_result, class_names, _MODEL_SIZE)
 
-        print('Detections have been saved successfully.')
+        print('Detections have been saved successfully.', object_list)
 
     elif type == 'video':
+        name_list = []
         inputs = tf.compat.v1.placeholder(tf.float32, [1, *_MODEL_SIZE, 3])
         detections = model(inputs, training=False)
         saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables(scope='yolo_v3_model'))
 
+        # Convert video to mp4 
+        print(input_names[0])
+        convert_to_mp4(input_names[0])
         with tf.compat.v1.Session() as sess:
             saver.restore(sess, './weights/model.ckpt')
 
             win_name = 'Video detection'
             cv2.namedWindow(win_name)
-            cap = cv2.VideoCapture(input_names[0])
+            cap = cv2.VideoCapture("data/video/clip.mp4")
             frame_size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH),
                           cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fourcc = cv2.VideoWriter_fourcc(*'X264')
@@ -79,7 +85,7 @@ def main(type, iou_threshold, confidence_threshold, input_names):
                                                 feed_dict={inputs: [resized_frame]})
 
                     draw_frame(frame, frame_size, detection_result,
-                               class_names, _MODEL_SIZE)
+                               class_names, _MODEL_SIZE, name_list)
 
                     cv2.imshow(win_name, frame)
 

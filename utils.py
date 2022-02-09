@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from seaborn import color_palette
 import cv2
-
+from edits import names_to_list, names_list_to_json
 
 def load_images(img_names, model_size):
     """Loads images in a 4D array.
@@ -36,7 +36,6 @@ def load_class_names(file_name):
         class_names = f.read().splitlines()
     return class_names
 
-
 def draw_boxes(img_names, boxes_dicts, class_names, model_size):
     """Draws detected boxes.
     Args:
@@ -47,6 +46,7 @@ def draw_boxes(img_names, boxes_dicts, class_names, model_size):
     Returns:
         None.
     """
+    name_list = []
     colors = ((np.array(color_palette("hls", 80)) * 255)).astype(np.uint8)
     for num, img_name, boxes_dict in zip(range(len(img_names)), img_names,
                                          boxes_dicts):
@@ -77,15 +77,17 @@ def draw_boxes(img_names, boxes_dicts, class_names, model_size):
                         fill=tuple(color))
                     draw.text((x0, y0 - text_size[1]), text, fill='black',
                               font=font)
+                    names_to_list(class_names[cls], name_list)
                     print('{} {:.2f}%'.format(class_names[cls],
                                               confidence * 100))
-
+                    
+        names_list_to_json(name_list)              
         rgb_img = img.convert('RGB')
 
         rgb_img.save('./detections/detection_' + str(num + 1) + '.jpg')
 
 
-def draw_frame(frame, frame_size, boxes_dicts, class_names, model_size):
+def draw_frame(frame, frame_size, boxes_dicts, class_names, model_size, name_list):
     """Draws detected boxes in a video frame.
     Args:
         frame: A video frame.
@@ -96,6 +98,7 @@ def draw_frame(frame, frame_size, boxes_dicts, class_names, model_size):
     Returns:
         None.
     """
+
     boxes_dict = boxes_dicts[0]
     resize_factor = (frame_size[0] / model_size[1], frame_size[1] / model_size[0])
     colors = ((np.array(color_palette("hls", 80)) * 255)).astype(np.uint8)
@@ -116,3 +119,5 @@ def draw_frame(frame, frame_size, boxes_dicts, class_names, model_size):
                               color[::-1], thickness=cv2.FILLED)
                 cv2.putText(frame, class_names[cls], (xy[0], xy[1] - baseline),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 0, 0), 1)
+                names_to_list(class_names[cls], name_list)
+    names_list_to_json(name_list)
