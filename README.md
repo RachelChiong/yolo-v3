@@ -15,7 +15,6 @@ conda create -n yolov3
 conda activate yolov3
 conda install python=3.7
 
-```
 pip install -r requirements.txt
 ```
 
